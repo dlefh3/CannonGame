@@ -1,4 +1,4 @@
-package com.fic.android.cannongame;
+package com.dlefh3.android.cannongame;
 
 import android.graphics.Canvas;
 import android.view.SurfaceHolder;

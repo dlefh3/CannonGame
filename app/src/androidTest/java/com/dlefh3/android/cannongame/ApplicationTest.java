@@ -1,4 +1,4 @@
-package com.fic.android.cannongame;
+package com.dlefh3.android.cannongame;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

@@ -1,4 +1,4 @@
-package com.fic.android.cannongame;
+package com.dlefh3.android.cannongame;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -31,7 +31,7 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     private static final int CANNON_SOUND_ID = 1;
     private static final int BLOCKER_SOUND_ID = 2;
     protected double totalElapsedTime; // elapsed seconds
-    private CannonThread cannonThread; // controls the game loop
+    private com.dlefh3.android.cannongame.CannonThread cannonThread; // controls the game loop
     private Activity activity; // to display Game Over dialog in GUI thread
     private boolean dialogIsDisplayed = false;
     // variables for the game loop and tracking statistics
@@ -186,7 +186,7 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
         if (gameOver) // starting a new game after the last game ended
         {
             gameOver = false;
-            cannonThread = new CannonThread(getHolder(), this); // create thread
+            cannonThread = new com.dlefh3.android.cannongame.CannonThread(getHolder(), this); // create thread
             cannonThread.start(); // start the game loop thread
         }
     } // end method newGame

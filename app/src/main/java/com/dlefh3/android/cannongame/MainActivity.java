@@ -1,7 +1,7 @@
-package com.fic.android.cannongame;
+package com.dlefh3.android.cannongame;
 
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 
