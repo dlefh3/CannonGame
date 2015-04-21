@@ -1,40 +1,18 @@
 package com.dlefh3.android.cannongame;
 
-import android.app.Activity;
-import android.app.AlertDialog;
-import android.app.Dialog;
-import android.app.DialogFragment;
-import android.content.Context;
-import android.content.DialogInterface;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.Point;
-import android.media.AudioManager;
-import android.media.SoundPool;
-import android.os.Bundle;
-import android.util.AttributeSet;
-import android.util.Log;
-import android.util.SparseIntArray;
-import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
-
-import java.util.ArrayList;
-
-public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
+/**
+public class CannonViewBackup extends SurfaceView implements SurfaceHolder.Callback {
     // constants for game play
     public static final int TARGET_PIECES = 7; // sections in the target
     public static final int MISS_PENALTY = 2; // seconds deducted on a miss
     public static final int HIT_REWARD = 3; // seconds added on a hit
-    public static final int ACTIVE_BALLS = 2; // number of acive cannon balls allowed
     private static final String TAG = "CannonView"; // for logging errors
     // constants and variables for managing sounds
     private static final int TARGET_SOUND_ID = 0;
     private static final int CANNON_SOUND_ID = 1;
     private static final int BLOCKER_SOUND_ID = 2;
     protected double totalElapsedTime; // elapsed seconds
-    private com.dlefh3.android.cannongame.CannonThread cannonThread; // controls the game loop
+    private CannonThread cannonThread; // controls the game loop
     private Activity activity; // to display Game Over dialog in GUI thread
     private boolean dialogIsDisplayed = false;
     // variables for the game loop and tracking statistics
@@ -59,13 +37,12 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     private boolean[] hitStates; // is each target piece hit?
     private int targetPiecesHit; // number of target pieces hit (out of 7)
     // variables for the cannon and cannonball
-    private ArrayList<CannonBall> balls;
-    //private Point cannonball; // cannonball image's upper-left corner
-    //private int cannonballVelocityX; // cannonball's x velocity
-    //private int cannonballVelocityY; // cannonball's y velocity
-    //private boolean cannonballOnScreen; // whether cannonball on the screen
-    //private int cannonballRadius; // cannonball's radius
-    //private int cannonballSpeed; // cannonball's speed
+    private Point cannonball; // cannonball image's upper-left corner
+    private int cannonballVelocityX; // cannonball's x velocity
+    private int cannonballVelocityY; // cannonball's y velocity
+    private boolean cannonballOnScreen; // whether cannonball on the screen
+    private int cannonballRadius; // cannonball's radius
+    private int cannonballSpeed; // cannonball's speed
     private int cannonBaseRadius; // cannon base's radius
     private int cannonLength; // cannon barrel's length
     private Point barrelEnd; // the endpoint of the cannon's barrel
@@ -93,21 +70,17 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     private double score = 0.0; // Holds current score
 
     // public constructor
-    public CannonView(Context context, AttributeSet attrs) {
+    public CannonViewBackup(Context context, AttributeSet attrs) {
         super(context, attrs); // call superclass constructor
         activity = (Activity) context; // store reference to MainActivity
 
         // register SurfaceHolder.Callback listener
         getHolder().addCallback(this);
 
-        // create cannon balls
-        for (int i = 0; i < ACTIVE_BALLS; i++)
-        {
-            balls.add(new CannonBall()); // create cannonballs
-        }
         // initialize Lines and Point representing game items
         blocker = new Line(); // create the blocker as a Line
         target = new Line(); // create the target as a Line
+        cannonball = new Point(); // create the cannonball as a Point
 
         // initialize hitStates as a boolean array
         hitStates = new boolean[TARGET_PIECES];
@@ -150,11 +123,9 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
         screenHeight = h; // store CannonView's height
         cannonBaseRadius = h / 18; // cannon base radius 1/18 screen height
         cannonLength = w / 8; // cannon length 1/8 screen width
-        for (CannonBall ball: balls)
-        {
-            ball.setRadius((int)(w / 36 * ballSizeMultiplier)); // cannonball radius 1/36 screen width
-            ball.setSpeed((int)(w * 3 / 2 * ballSpeedMultiplier)); // cannonball speed multiplier
-        }
+
+        cannonballRadius = (int)(w / 36 * ballSizeMultiplier); // cannonball radius 1/36 screen width
+        cannonballSpeed = (int)(w * 3 / 2 * ballSpeedMultiplier); // cannonball speed multiplier
 
         lineWidth = w / 24; // target and blocker 1/24 screen width
 
@@ -199,10 +170,7 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
         blockerVelocity = initialBlockerVelocity; // set initial velocity
         targetVelocity = initialTargetVelocity; // set initial velocity
         timeLeft = 10; // start the countdown at 10 seconds
-        for(CannonBall ball: balls) {
-            ball.setOnScreen(false);// the cannonball is not on the screen
-        }
-
+        cannonballOnScreen = false; // the cannonball is not on the screen
         shotsFired = 0; // set the initial number of shots fired
         totalElapsedTime = 0.0; // set the time elapsed to zero
 
@@ -215,7 +183,7 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
         if (gameOver) // starting a new game after the last game ended
         {
             gameOver = false;
-            cannonThread = new com.dlefh3.android.cannongame.CannonThread(getHolder(), this); // create thread
+            cannonThread = new CannonThread(getHolder(), this); // create thread
             cannonThread.start(); // start the game loop thread
         }
     } // end method newGame
@@ -223,69 +191,63 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     // called repeatedly by the CannonThread to update game elements
     protected void updatePositions(double elapsedTimeMS) {
         double interval = elapsedTimeMS / 1000.0; // convert to seconds
-        for (CannonBall ball: balls)
+
+        if (cannonballOnScreen) // if there is currently a shot fired
         {
-            if (ball.isOnScreen()) // if there is currently a shot fired
-            {
+            // update cannonball position
+            cannonball.x += interval * cannonballVelocityX;
+            cannonball.y += interval * cannonballVelocityY;
 
-                // update cannonball position
-                ball.setX(ball.getX() + (int)(interval * ball.getVelocityX())) ;
-                ball.setY(ball.getY() + (int) (interval * ball.getVelocityY())) ;
+            // check for collision with blocker
+            if (cannonball.x + cannonballRadius > blockerDistance &&
+                    cannonball.x - cannonballRadius < blockerDistance &&
+                    cannonball.y + cannonballRadius > blocker.start.y &&
+                    cannonball.y - cannonballRadius < blocker.end.y) {
+                cannonballVelocityX *= -1; // reverse cannonball's direction
+                timeLeft -= MISS_PENALTY; // penalize the user
 
+                // play blocker sound
+                soundPool.play(soundMap.get(BLOCKER_SOUND_ID), 1, 1, 1, 0, 1f);
+            }
+            // check for collisions with left and right walls
+            else if (cannonball.x + cannonballRadius > screenWidth ||
+                    cannonball.x - cannonballRadius < 0) {
+                cannonballOnScreen = false; // remove cannonball from screen
+            }
+            // check for collisions with top and bottom walls
+            else if (cannonball.y + cannonballRadius > screenHeight ||
+                    cannonball.y - cannonballRadius < 0) {
+                cannonballOnScreen = false; // remove cannonball from screen
+            }
+            // check for cannonball collision with target
+            else if (cannonball.x + cannonballRadius > targetDistance &&
+                    cannonball.x - cannonballRadius < targetDistance &&
+                    cannonball.y + cannonballRadius > target.start.y &&
+                    cannonball.y - cannonballRadius < target.end.y) {
+                // determine target section number (0 is the top)
+                int section =
+                        (int) ((cannonball.y - target.start.y) / pieceLength);
 
-                // check for collision with blocker
-                if (ball.getX() + ball.getRadius() > blockerDistance &&
-                        ball.getX() - ball.getRadius() < blockerDistance &&
-                        ball.getY() + ball.getRadius() > blocker.start.y &&
-                        ball.getY() - ball.getRadius() < blocker.end.y)
-                {
-                    ball.setVelocityX(ball.getVelocityY() * -1); // reverse cannonball's direction
-                    timeLeft -= MISS_PENALTY; // penalize the user
+                // check if the piece hasn't been hit yet
+                if ((section >= 0 && section < TARGET_PIECES) &&
+                        !hitStates[section]) {
+                    hitStates[section] = true; // section was hit
+                    cannonballOnScreen = false; // remove cannonball
+                    timeLeft += HIT_REWARD; // add reward to remaining time
 
-                    // play blocker sound
-                    soundPool.play(soundMap.get(BLOCKER_SOUND_ID), 1, 1, 1, 0, 1f);
-                }
-                // check for collisions with left and right walls
-                else if (ball.getX() + ball.getRadius() > screenWidth ||
-                        ball.getX() - ball.getRadius() < 0) {
-                    ball.setOnScreen(false); // remove cannonball from screen
-                }
-                // check for collisions with top and bottom walls
-                else if (cannonball.y + cannonballRadius > screenHeight ||
-                        cannonball.y - cannonballRadius < 0) {
-                    cannonballOnScreen = false; // remove cannonball from screen
-                }
-                // check for cannonball collision with target
-                else if (cannonball.x + cannonballRadius > targetDistance &&
-                        cannonball.x - cannonballRadius < targetDistance &&
-                        cannonball.y + cannonballRadius > target.start.y &&
-                        cannonball.y - cannonballRadius < target.end.y) {
-                    // determine target section number (0 is the top)
-                    int section =
-                            (int) ((cannonball.y - target.start.y) / pieceLength);
+                    // play target hit sound
+                    soundPool.play(soundMap.get(TARGET_SOUND_ID), 1,
+                            1, 1, 0, 1f);
 
-                    // check if the piece hasn't been hit yet
-                    if ((section >= 0 && section < TARGET_PIECES) &&
-                            !hitStates[section]) {
-                        hitStates[section] = true; // section was hit
-                        cannonballOnScreen = false; // remove cannonball
-                        timeLeft += HIT_REWARD; // add reward to remaining time
-
-                        // play target hit sound
-                        soundPool.play(soundMap.get(TARGET_SOUND_ID), 1,
-                                1, 1, 0, 1f);
-
-                        // if all pieces have been hit
-                        if (++targetPiecesHit == TARGET_PIECES) {
-                            cannonThread.setRunning(false); // terminate thread
-                            showGameOverDialog(R.string.win); // show winning dialog
-                            gameOver = true;
-                        }
+                    // if all pieces have been hit
+                    if (++targetPiecesHit == TARGET_PIECES) {
+                        cannonThread.setRunning(false); // terminate thread
+                        showGameOverDialog(R.string.win); // show winning dialog
+                        gameOver = true;
                     }
                 }
             }
         }
-
 
         // update the blocker's position
         double blockerUpdate = interval * blockerVelocity;
@@ -528,3 +490,4 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     } // end method onTouchEvent
 
 } // end class CannonView
+*/
