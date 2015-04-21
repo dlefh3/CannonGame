@@ -131,6 +131,12 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+        if (h < w)
+        {
+            int temp = h;
+            h = w;
+            w = temp;
+        }
 
         screenWidth = w; // store CannonView's width
         screenHeight = h; // store CannonView's height
