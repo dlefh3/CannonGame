@@ -78,6 +78,16 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     private Paint targetPaint; // Paint used to draw the target
     private Paint backgroundPaint; // Paint used to clear the drawing area
 
+    // Variables to control level difficulty
+    private int level = 1; // Level Number
+    private double ballSizeMultiplier = 1.0; // Initial ball size
+    private double ballSpeedMultiplier = 1.0; //Initial ball speed
+    private double ballSpeedIncrease = 0.1; // Multiplicative rate of speed increase
+    private double ballSizeIncrease = 0.5; // Multiplicative rate of size increase
+
+    // Score keeping
+    private double score = 0.0; // Holds current score
+
     // public constructor
     public CannonView(Context context, AttributeSet attrs) {
         super(context, attrs); // call superclass constructor
@@ -127,8 +137,8 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
         cannonBaseRadius = h / 18; // cannon base radius 1/18 screen height
         cannonLength = w / 8; // cannon length 1/8 screen width
 
-        cannonballRadius = w / 36; // cannonball radius 1/36 screen width
-        cannonballSpeed = w * 3 / 2; // cannonball speed multiplier
+        cannonballRadius = (int)(w / 36 * ballSizeMultiplier); // cannonball radius 1/36 screen width
+        cannonballSpeed = (int)(w * 3 / 2 * ballSpeedMultiplier); // cannonball speed multiplier
 
         lineWidth = w / 24; // target and blocker 1/24 screen width
 
@@ -341,6 +351,12 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
         canvas.drawText(getResources().getString(
                 R.string.time_remaining_format, timeLeft), 30, 50, textPaint);
 
+        // display speed multiplier
+        canvas.drawText(getResources().getString(
+                R.string.speed_multiplier_format, ballSpeedMultiplier), 30, 150, textPaint);
+        // display size multiplier
+        canvas.drawText(getResources().getString(
+                R.string.size_multiplier_format, ballSizeMultiplier), 30, 250, textPaint);
         // if a cannonball is currently on the screen, draw it
         if (cannonballOnScreen)
             canvas.drawCircle(cannonball.x, cannonball.y, cannonballRadius,
