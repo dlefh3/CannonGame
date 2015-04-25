@@ -202,34 +202,64 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
 
     // reset all the screen elements and start a new game
     public void newGame() {
-        // set every element of hitStates to false--restores target pieces
-        for (int i = 0; i < TARGET_PIECES; i++)
-            hitStates[i] = false;
-
-        targetPiecesHit = 0; // no target pieces have been hit
-        blockerVelocity = initialBlockerVelocity; // set initial velocity
-        targetVelocity = initialTargetVelocity; // set initial velocity
-        timeLeft = GAME_LENGTH; // start the countdown
-
-        for(CannonBall ball: balls) {
-            ball.setOnScreen(false);// the cannonball is not on the screen
-        }
-
-        shotsFired = 0; // set the initial number of shots fired
-        totalElapsedTime = 0.0; // set the time elapsed to zero
-
-        // set the start and end Points of the blocker and target
-        blocker.start.set(blockerDistance, blockerBeginning);
-        blocker.end.set(blockerDistance, blockerEnd);
-        target.start.set(targetDistance, targetBeginning);
-        target.end.set(targetDistance, targetEnd);
-
-        if (gameOver) // starting a new game after the last game ended
+        if (stateRestored)
         {
-            gameOver = false;
-            cannonThread = new com.dlefh3.android.cannongame.CannonThread(getHolder(), this); // create thread
-            cannonThread.start(); // start the game loop thread
+            stateRestored = false;
+            blockerVelocity = initialBlockerVelocity; // set initial velocity
+            targetVelocity = initialTargetVelocity; // set initial velocity
+
+            for(CannonBall ball: balls) {
+                ball.setOnScreen(false);// the cannonball is not on the screen
+            }
+
+            shotsFired = 0; // set the initial number of shots fired
+            totalElapsedTime = 0.0; // set the time elapsed to zero
+
+            // set the start and end Points of the blocker and target
+            blocker.start.set(blockerDistance, blockerBeginning);
+            blocker.end.set(blockerDistance, blockerEnd);
+            target.start.set(targetDistance, targetBeginning);
+            target.end.set(targetDistance, targetEnd);
+
+            if (gameOver) // starting a new game after the last game ended
+            {
+                gameOver = false;
+                cannonThread = new com.dlefh3.android.cannongame.CannonThread(getHolder(), this); // create thread
+                cannonThread.start(); // start the game loop thread
+            }
         }
+        else
+        {
+            // set every element of hitStates to false--restores target pieces
+            for (int i = 0; i < TARGET_PIECES; i++)
+                hitStates[i] = false;
+
+            targetPiecesHit = 0; // no target pieces have been hit
+            blockerVelocity = initialBlockerVelocity; // set initial velocity
+            targetVelocity = initialTargetVelocity; // set initial velocity
+            timeLeft = GAME_LENGTH; // start the countdown
+
+            for(CannonBall ball: balls) {
+                ball.setOnScreen(false);// the cannonball is not on the screen
+            }
+
+            shotsFired = 0; // set the initial number of shots fired
+            totalElapsedTime = 0.0; // set the time elapsed to zero
+
+            // set the start and end Points of the blocker and target
+            blocker.start.set(blockerDistance, blockerBeginning);
+            blocker.end.set(blockerDistance, blockerEnd);
+            target.start.set(targetDistance, targetBeginning);
+            target.end.set(targetDistance, targetEnd);
+
+            if (gameOver) // starting a new game after the last game ended
+            {
+                gameOver = false;
+                cannonThread = new com.dlefh3.android.cannongame.CannonThread(getHolder(), this); // create thread
+                cannonThread.start(); // start the game loop thread
+            }
+        }
+
     } // end method newGame
 
     // called repeatedly by the CannonThread to update game elements
