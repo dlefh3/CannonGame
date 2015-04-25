@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.fic.android.cannongame.CannonView
+    <com.dlefh3.android.cannongame.CannonView
         android:background="#ccc"
         android:layout_width="300dp"
         android:layout_height="300dp"

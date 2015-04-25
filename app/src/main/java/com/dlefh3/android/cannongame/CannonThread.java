@@ -38,7 +38,8 @@ public class CannonThread extends Thread {
                     double elapsedTimeMS = currentTime - previousFrameTime;
                     cannonView.totalElapsedTime += elapsedTimeMS / 1000.0;
                     cannonView.updatePositions(elapsedTimeMS); // update game state
-                    cannonView.drawGameElements(canvas); // draw using the canvas
+                    if (canvas != null)
+                        cannonView.drawGameElements(canvas); // draw using the canvas
                     previousFrameTime = currentTime; // update previous time
                 }
             } finally {
