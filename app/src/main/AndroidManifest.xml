@@ -16,6 +16,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/title_activity_about" >
+        </activity>
+        <activity
+            android:name=".ScoresActivity"
+            android:label="@string/title_activity_scores" >
+        </activity>
     </application>
 
 </manifest>

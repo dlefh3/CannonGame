@@ -1,5 +1,7 @@
 package com.dlefh3.android.cannongame;
 
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -11,6 +13,14 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        SharedPreferences prefs = getSharedPreferences(getString(R.string.pref_file), 0);
+        if(prefs.getBoolean(getString(R.string.how_key), true))
+        {
+            Intent i = new Intent(MainActivity.this, AboutActivity.class);
+            //Bring the activity to the front instead of making a new one
+            i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(i);
+        }
         setContentView(R.layout.activity_main);
     }
 
@@ -33,6 +43,7 @@ public class MainActivity extends ActionBarActivity {
         if (id == R.id.action_settings) {
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }

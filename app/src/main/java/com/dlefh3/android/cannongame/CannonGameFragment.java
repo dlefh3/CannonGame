@@ -1,14 +1,20 @@
 package com.dlefh3.android.cannongame;
 
 import android.app.Fragment;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class CannonGameFragment extends Fragment {
     private CannonView cannonView; // custom view to display the game
+
 
     // called when Fragment's view needs to be created
     @Override
@@ -17,7 +23,7 @@ public class CannonGameFragment extends Fragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View view =
                 inflater.inflate(R.layout.fragment_cannon_game, container, false);
-
+        setHasOptionsMenu(true);
         // get the CannonView
         cannonView = (CannonView) view.findViewById(R.id.cannonView);
         return view;
@@ -44,5 +50,41 @@ public class CannonGameFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         cannonView.releaseResources();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater)
+    {
+
+        //super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.game_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item)
+    {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.clear_scores) {
+            LevelDatabaseHelper databaseHelper = new LevelDatabaseHelper(getActivity().getApplicationContext());
+            databaseHelper.clearScores();
+
+
+            return true;
+        }
+        if (id == R.id.about) {
+            cannonView.stopGame();
+            SharedPreferences prefs = getActivity().getSharedPreferences(getString(R.string.pref_file), 0);
+
+            Intent i = new Intent(getActivity(), AboutActivity.class);
+            //Bring the activity to the front instead of making a new one
+            i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(i);
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 } // end class CannonGameFragment

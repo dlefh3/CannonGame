@@ -55,13 +55,6 @@ public class CannonBall {
         return velocityX;
     }
 
-    public void addVelocityX(double v, int mode)
-    {
-        if(mode == ADDITIVE_INCREASE)
-            this.velocityX += (int) v;
-        else if (mode == MULTIPLICATIVE_INCREASE)
-            this.velocityX = (int)(this.velocityX * v);
-    }
     public void setVelocityX(int velocityX) {
         this.velocityX = velocityX;
     }
