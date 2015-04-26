@@ -84,6 +84,15 @@ public class CannonGameFragment extends Fragment {
 
             return true;
         }
+        if (id == R.id.scores)
+        {
+            Intent i = new Intent(getActivity(), ScoresActivity.class);
+            //Bring the activity to the front instead of making a new one
+            i.setFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
+            startActivity(i);
+
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
     }

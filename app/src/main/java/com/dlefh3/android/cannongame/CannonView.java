@@ -95,11 +95,17 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     private double ballSpeedIncrease = 0.1; // Multiplicative rate of speed increase
     private double ballSizeIncrease = 0.15; // Multiplicative rate of size increase
 
+    private boolean powerUpActive = false;
+    private double powerUpLength = 3.0;
+    private double powerUpRemaining = 0;
+    private double powerUpChance = 0.1;
+
     private boolean stateRestored = false;
     private LevelDatabaseHelper dbHelper;
     // Score keeping
     private double score = 0.0; // Holds current score
 
+    private double slowMotionMultiplier = 1.0; // Multiplier to control the speed of blocker and targets
 
     // public constructor
     public CannonView(Context context, AttributeSet attrs) {
@@ -239,6 +245,7 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
         level++;
         ballSpeedMultiplier -= ballSpeedIncrease;
         ballSizeMultiplier += ballSizeIncrease;
+        slowMotionMultiplier = 1.0;
 
         cannonballRadius = (int)(screenWidth / 36 * ballSizeMultiplier);
         cannonballSpeed = (int)(screenWidth * 3 / 2 * ballSpeedMultiplier);
@@ -274,6 +281,7 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
 
         ballSpeedMultiplier = 1.0;
         ballSizeMultiplier = 1.0;
+        slowMotionMultiplier = 1.0;
         cannonballRadius = (int)(screenWidth / 36 * ballSizeMultiplier);
         cannonballSpeed = (int)(screenWidth * 3 / 2 * ballSpeedMultiplier);
 
@@ -315,6 +323,15 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
     // called repeatedly by the CannonThread to update game elements
     protected void updatePositions(double elapsedTimeMS) {
         double interval = elapsedTimeMS / 1000.0; // convert to seconds
+        if (powerUpActive)
+        {
+            slowMotionMultiplier = 0.5;
+            powerUpRemaining -= interval;
+            if (powerUpRemaining <= 0 )
+                powerUpActive = false;
+        }
+        else
+            slowMotionMultiplier = 1.0;
         for (CannonBall ball: balls)
         {
             if (ball.isOnScreen()) // if there is currently a shot fired
@@ -364,6 +381,12 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
                         timeLeft += HIT_REWARD; // add reward to remaining time
                         score += 1;
 
+                        //Chance for power up to activate
+                        if (Math.random() > powerUpChance)
+                        {
+                            powerUpRemaining = powerUpLength;
+                            powerUpActive = true;
+                        }
                         // play target hit sound
                         soundPool.play(soundMap.get(TARGET_SOUND_ID), 1,
                                 1, 1, 0, 1f);
@@ -382,12 +405,12 @@ public class CannonView extends SurfaceView implements SurfaceHolder.Callback {
 
 
         // update the blocker's position
-        double blockerUpdate = interval * blockerVelocity;
+        double blockerUpdate = interval * blockerVelocity * slowMotionMultiplier;
         blocker.start.y += blockerUpdate;
         blocker.end.y += blockerUpdate;
 
         // update the target's position
-        double targetUpdate = interval * targetVelocity;
+        double targetUpdate = interval * targetVelocity * slowMotionMultiplier;
         target.start.y += targetUpdate;
         target.end.y += targetUpdate;
 

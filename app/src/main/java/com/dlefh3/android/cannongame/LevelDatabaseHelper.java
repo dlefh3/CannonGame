@@ -62,6 +62,23 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper
         }while(cursor.moveToNext());
         return results;
     }
+
+    public ArrayList<Double> getAllScores()
+    {
+        ArrayList<Double> results = new ArrayList<Double>();
+        String[] cols = {COLUMN_SCORE};
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor cursor = db.query(TABLE_LEVEL, cols,null, null, null, null, COLUMN_SCORE + " DESC" );
+        if (cursor.getCount() > 0)
+            cursor.moveToFirst();
+        else
+            return results;
+        do
+        {
+            results.add(cursor.getDouble(0));
+        }while(cursor.moveToNext());
+        return results;
+    }
     public void clearScores()
     {
         SQLiteDatabase db = getWritableDatabase();

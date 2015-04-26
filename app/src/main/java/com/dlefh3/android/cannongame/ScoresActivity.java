@@ -2,45 +2,44 @@ package com.dlefh3.android.cannongame;
 
 import android.app.ListActivity;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.ListView;
+
+import com.dlefh3.android.cannongame.score_adapter.Score;
+import com.dlefh3.android.cannongame.score_adapter.ScoreAdpater;
+
+import java.util.ArrayList;
 
 
 public class ScoresActivity extends ListActivity
 {
+    private ScoreAdpater scoreAdpater = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_scores);
+        ListView lv = getListView();
+        scoreAdpater = new ScoreAdpater(ScoresActivity.this);
+        setListAdapter(scoreAdpater);
+        generateData();
 
 
     }
 
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu)
+    private void generateData()
     {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_scores, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item)
-    {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings)
+        LevelDatabaseHelper db = new LevelDatabaseHelper(getApplicationContext());
+        ArrayList<Double> scores = db.getAllScores();
+        scoreAdpater.clear();
+        for(double s: scores)
         {
-            return true;
+            Score score = new Score(s);
+            scoreAdpater.add(score);
         }
+        scoreAdpater.notifyDataSetChanged();
 
-        return super.onOptionsItemSelected(item);
     }
+
+
 }

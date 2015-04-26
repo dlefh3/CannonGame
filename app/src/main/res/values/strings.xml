@@ -19,4 +19,5 @@
     <string name="pref_file">howToPlay</string>
     <string name="how_key">howToPlay</string>
     <string name="title_activity_scores">ScoresActivity</string>
+    <string name="scores">Scores</string>
 </resources>
